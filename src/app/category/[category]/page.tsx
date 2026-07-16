@@ -169,7 +169,7 @@ export default async function CategoryPage({
             return (
               <div
                 key={ts.teamNumber}
-                className={`glass-card p-4 text-center fade-in-up relative overflow-hidden ${isLeader ? 'border-blue-500/40' : ''}`}
+                className={`lift-3d glass-card p-4 text-center fade-in-up relative overflow-hidden ${isLeader ? 'border-blue-500/40' : ''}`}
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
                 {isLeader && (

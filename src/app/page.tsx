@@ -152,12 +152,12 @@ export default async function HomePage() {
 
         {/* Category Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {summaries.map((s, i) => (
+          {summaries.map((s) => (
             <Link
               key={s.category}
               href={`/category/${s.category}`}
-              className="glass-card p-6 hover:border-blue-500/40 transition-all group cursor-pointer block fade-in-up"
-              style={{ animationDelay: `${i * 0.1}s` }}
+              className="lift-3d card-shine glass-card p-6 hover:border-blue-500/40 transition-all group cursor-pointer block fade-in-up"
+              style={{ animationDelay: `${summaries.indexOf(s) * 0.1}s` }}
             >
               {/* Card header */}
               <div className="flex items-center justify-between mb-4">

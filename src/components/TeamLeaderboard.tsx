@@ -89,7 +89,7 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
           return (
             <div
               key={team.teamNumber}
-              className={`leaderboard-row rounded-xl p-4 cursor-pointer border transition-all ${
+              className={`depth-row card-shine rounded-xl p-4 cursor-pointer border transition-all ${
                 isLeader ? 'border-blue-500/30' : 'border-slate-700/30'
               }`}
               style={{
@@ -105,7 +105,7 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
                 {/* Rank / Medal */}
                 <div className="flex-shrink-0 w-10 text-center">
                   {medal.icon ? (
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${medal.cls} bounce-in`}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg medal-spin ${medal.cls} bounce-in`}
                       style={{ animationDelay: `${rank * 0.2}s` }}>
                       {medal.icon}
                     </div>
@@ -150,7 +150,7 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
                         }}
                       />
                     </div>
-                    <span className="text-sm font-bold min-w-[42px] text-right" style={{ color: TEAM_COLORS[idx].text }}>
+                    <span className={`text-sm font-bold min-w-[42px] text-right ${isLeader ? 'glow-text' : ''}`} style={{ color: TEAM_COLORS[idx].text }}>
                       {team.pct}%
                     </span>
                   </div>

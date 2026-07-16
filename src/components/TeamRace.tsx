@@ -78,7 +78,7 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
       </div>
 
       {/* Race track */}
-      <div className="space-y-3">
+      <div className="race-3d space-y-3">
         {sorted.map((team, rank) => {
           const idx = team.teamNumber - 1;
           const gap = leader.pct - team.pct;
@@ -89,7 +89,7 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
           return (
             <div
               key={team.teamNumber}
-              className="race-run"
+              className="race-run race-3d-lane"
               style={{ animationDelay: `${rank * 0.12}s` }}
               onMouseEnter={() => setHoveredTeam(team.teamNumber)}
               onMouseLeave={() => setHoveredTeam(null)}
@@ -133,7 +133,7 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
 
                 {/* Runner icon */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 z-20 transition-all text-lg"
+                  className={`absolute top-1/2 -translate-y-1/2 z-20 transition-all text-lg ${isLeader ? 'runner-bounce' : ''}`}
                   style={{
                     left: `${Math.max(team.pct - 3, 1)}%`,
                     filter: isLeader ? 'drop-shadow(0 0 6px rgba(251,191,36,0.6))' : 'none',
