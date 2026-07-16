@@ -152,3 +152,179 @@ body {
 .fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
+
+/* Competitive / Interactive animations */
+@keyframes slideInRight {
+  0% { transform: translateX(-100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes countUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+@keyframes barFill {
+  0% { width: 0%; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes raceRun {
+  0% { transform: translateX(-20px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+@keyframes gapPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes streakGlow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out forwards;
+}
+
+.count-up {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+.pulse-ring {
+  animation: pulseRing 2s ease-out infinite;
+}
+
+.bar-fill {
+  animation: barFill 1.2s ease-out forwards;
+}
+
+.bounce-in {
+  animation: bounceIn 0.5s ease-out forwards;
+}
+
+.race-run {
+  animation: raceRun 0.6s ease-out forwards;
+}
+
+.wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.gap-pulse {
+  animation: gapPulse 2s ease-in-out infinite;
+}
+
+.streak-glow {
+  animation: streakGlow 2s ease-in-out infinite;
+}
+
+/* Team colors */
+.team-1-color { color: #60a5fa; }
+.team-2-color { color: #22d3ee; }
+.team-3-color { color: #818cf8; }
+.team-4-color { color: #34d399; }
+
+.team-1-bg { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+.team-2-bg { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+.team-3-bg { background: linear-gradient(135deg, #6366f1, #818cf8); }
+.team-4-bg { background: linear-gradient(135deg, #10b981, #34d399); }
+
+/* Race track */
+.race-track {
+  background: linear-gradient(90deg, rgba(30,58,107,0.5) 0%, rgba(22,45,84,0.3) 100%);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.race-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 24.9%,
+    rgba(59,130,246,0.08) 25%,
+    rgba(59,130,246,0.08) 25.2%
+  );
+  pointer-events: none;
+}
+
+/* Leaderboard row hover effect */
+.leaderboard-row {
+  transition: all 0.3s ease;
+}
+.leaderboard-row:hover {
+  transform: translateX(4px);
+  background: rgba(37,99,235,0.08);
+}
+
+/* Progress bar with animated fill */
+.animated-bar {
+  position: relative;
+  overflow: hidden;
+}
+.animated-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  animation: shimmer 2s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+/* Medal styles */
+.medal-gold {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 0 12px rgba(251,191,36,0.4);
+}
+.medal-silver {
+  background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+  box-shadow: 0 0 8px rgba(148,163,184,0.3);
+}
+.medal-bronze {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 0 8px rgba(217,119,6,0.3);
+}
+
+/* Tooltip */
+.tooltip-trigger:hover .tooltip-content {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.tooltip-content {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}

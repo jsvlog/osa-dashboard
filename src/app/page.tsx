@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { ReportCategory } from '@/lib/types';
 import { CATEGORY_LABELS, CATEGORY_ORDER } from '@/lib/types';
 import Link from 'next/link';
+import { TeamLeaderboard } from '@/components/TeamLeaderboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +71,39 @@ export default async function HomePage() {
     return { category, totalReports, totalSubmissions, completionRate, lateCount, teamStats };
   });
 
+  // Build overall team stats for leaderboard
+  const totalReportsAll = summaries.reduce((s, c) => s + c.totalReports, 0);
+  const teamOverall = [1, 2, 3, 4].map((tn) => {
+    const totalSubmitted = summaries.reduce((s, c) => {
+      const ts = c.teamStats.find((t) => t.teamNumber === tn);
+      return s + (ts?.submitted || 0);
+    }, 0);
+    const totalPossible = totalReportsAll;
+    const pct = totalPossible > 0 ? Math.round((totalSubmitted / totalPossible) * 100) : 0;
+
+    // Count on-time vs late across all categories
+    let onTimeCount = 0;
+    let lateCount = 0;
+    for (const cat of summaries) {
+      const catTemplates = templates.filter((t) => t.category === cat.category);
+      const catSubs = submissions.filter((s) => {
+        const tpl = templates.find((t) => t.id === s.report_template_id);
+        return tpl?.category === cat.category && s.team_number === tn;
+      });
+      for (const tpl of catTemplates) {
+        const sub = catSubs.find((s) => s.report_template_id === tpl.id);
+        const deadline = new Date(tpl.deadline_date);
+        if (sub) {
+          onTimeCount++;
+        } else if (deadline < now) {
+          lateCount++;
+        }
+      }
+    }
+
+    return { teamNumber: tn, totalSubmitted, totalPossible, pct, lateCount, onTimeCount };
+  });
+
   const categoryIcons: Record<string, string> = {
     monthly: '📅',
     quarterly: '📊',
@@ -79,24 +113,51 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #162d54 50%, #0f2240 100%)' }}>
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      {/* Background decorative orbs */}
+      <div className="fixed top-10 right-20 w-80 h-80 rounded-full opacity-[0.04] pointer-events-none" style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', filter: 'blur(60px)' }} />
+      <div className="fixed bottom-20 left-10 w-96 h-96 rounded-full opacity-[0.04] pointer-events-none" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', filter: 'blur(80px)' }} />
+
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
-        <header className="text-center mb-10">
+        <header className="text-center mb-10 fade-in-up">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
             OSA <span className="gradient-text">Dashboard</span>
           </h1>
           <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
             Document Submission Tracking across all teams
           </p>
+          {/* Quick stats bar */}
+          <div className="flex items-center justify-center gap-6 mt-5">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
+              <span className="text-slate-400">{totalReportsAll} reports</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-slate-400">{submissions.length} submitted</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="w-2 h-2 rounded-full bg-red-400" />
+              <span className="text-slate-400">{summaries.reduce((s, c) => s + c.lateCount, 0)} overdue</span>
+            </div>
+          </div>
         </header>
+
+        {/* Team Leaderboard */}
+        {totalReportsAll > 0 && (
+          <div className="mb-8">
+            <TeamLeaderboard teams={teamOverall} />
+          </div>
+        )}
 
         {/* Category Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {summaries.map((s) => (
+          {summaries.map((s, i) => (
             <Link
               key={s.category}
               href={`/category/${s.category}`}
-              className="glass-card p-6 hover:border-blue-500/40 transition-all group cursor-pointer block"
+              className="glass-card p-6 hover:border-blue-500/40 transition-all group cursor-pointer block fade-in-up"
+              style={{ animationDelay: `${i * 0.1}s` }}
             >
               {/* Card header */}
               <div className="flex items-center justify-between mb-4">
@@ -106,21 +167,28 @@ export default async function HomePage() {
                     {CATEGORY_LABELS[s.category]}
                   </h2>
                 </div>
-                <span className="text-slate-500 group-hover:text-slate-400 transition">→</span>
+                <div className="flex items-center gap-2">
+                  {s.completionRate === 100 && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ✓ Complete
+                    </span>
+                  )}
+                  <span className="text-slate-500 group-hover:text-slate-400 transition">→</span>
+                </div>
               </div>
 
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-4 mb-5">
                 <div>
-                  <div className="text-2xl font-bold text-white">{s.totalReports}</div>
+                  <div className="text-2xl font-bold text-white count-up" style={{ animationDelay: `${i * 0.1 + 0.2}s` }}>{s.totalReports}</div>
                   <div className="text-xs text-slate-500">Reports</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-blue-300">{s.completionRate}%</div>
+                  <div className="text-2xl font-bold text-blue-300 count-up" style={{ animationDelay: `${i * 0.1 + 0.3}s` }}>{s.completionRate}%</div>
                   <div className="text-xs text-slate-500">Complete</div>
                 </div>
                 <div>
-                  <div className={`text-2xl font-bold ${s.lateCount > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  <div className={`text-2xl font-bold count-up ${s.lateCount > 0 ? 'text-red-400' : 'text-emerald-400'}`} style={{ animationDelay: `${i * 0.1 + 0.4}s` }}>
                     {s.lateCount}
                   </div>
                   <div className="text-xs text-slate-500">Late</div>
@@ -128,33 +196,49 @@ export default async function HomePage() {
               </div>
 
               {/* Progress bar */}
-              <div className="w-full h-2 rounded-full bg-slate-700/50 mb-4 overflow-hidden">
+              <div className="w-full h-2.5 rounded-full bg-slate-700/50 mb-4 overflow-hidden animated-bar">
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="h-full rounded-full bar-fill transition-all"
                   style={{
                     width: `${s.completionRate}%`,
-                    background: 'linear-gradient(90deg, #2563eb, #06b6d4)',
+                    background: s.completionRate === 100
+                      ? 'linear-gradient(90deg, #10b981, #34d399)'
+                      : 'linear-gradient(90deg, #2563eb, #06b6d4)',
+                    animationDelay: `${i * 0.1 + 0.3}s`,
                   }}
                 />
               </div>
 
-              {/* Per-team mini bars */}
+              {/* Per-team mini bars with competition indicators */}
               <div className="grid grid-cols-4 gap-2">
-                {s.teamStats.map((ts) => (
-                  <div key={ts.teamNumber} className="text-center">
-                    <div className="text-[10px] text-slate-500 mb-1">Team {ts.teamNumber}</div>
-                    <div className="w-full h-1.5 rounded-full bg-slate-700/50 overflow-hidden mb-0.5">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${ts.pct}%`,
-                          background: ts.pct === 100 ? '#34d399' : ts.pct >= 50 ? '#60a5fa' : '#f59e0b',
-                        }}
-                      />
+                {s.teamStats.map((ts) => {
+                  const isLeading = ts.pct === Math.max(...s.teamStats.map((t) => t.pct)) && ts.pct > 0;
+                  const isLagging = ts.pct === Math.min(...s.teamStats.map((t) => t.pct)) && ts.pct < Math.max(...s.teamStats.map((t) => t.pct));
+                  return (
+                    <div key={ts.teamNumber} className="text-center tooltip-trigger relative">
+                      <div className="text-[10px] text-slate-500 mb-1 flex items-center justify-center gap-0.5">
+                        Team {ts.teamNumber}
+                        {isLeading && <span className="text-[8px]">👑</span>}
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-slate-700/50 overflow-hidden mb-0.5">
+                        <div
+                          className="h-full rounded-full bar-fill"
+                          style={{
+                            width: `${ts.pct}%`,
+                            background: ts.pct === 100 ? '#34d399' : ts.pct >= 50 ? '#60a5fa' : '#f59e0b',
+                            animationDelay: `${i * 0.1 + 0.5}s`,
+                          }}
+                        />
+                      </div>
+                      <div className="text-[10px] text-slate-400">{ts.submitted}/{ts.total}</div>
+                      {isLagging && ts.pct < 100 && (
+                        <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded-lg bg-slate-800 border border-slate-600 text-[10px] text-amber-300 whitespace-nowrap z-30">
+                          ⚡ {Math.max(...s.teamStats.map((t) => t.pct)) - ts.pct}% behind
+                        </div>
+                      )}
                     </div>
-                    <div className="text-[10px] text-slate-400">{ts.submitted}/{ts.total}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Link>
           ))}
