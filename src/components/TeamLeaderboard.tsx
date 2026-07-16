@@ -28,7 +28,25 @@ function getMedal(rank: number) {
   if (rank === 0) return { icon: '🥇', label: 'Champion', cls: 'medal-gold' };
   if (rank === 1) return { icon: '🥈', label: 'Runner-up', cls: 'medal-silver' };
   if (rank === 2) return { icon: '🥉', label: 'Third Place', cls: 'medal-bronze' };
-  return { icon: '', label: '', cls: '' };
+  return { icon: '🐢', label: 'The Comeback Kid', cls: '' };
+}
+
+function getTeamTitle(rank: number, pct: number, lateCount: number): string {
+  if (pct === 100) return '🌟 The Perfectionists';
+  if (rank === 0) return '⚡ The Speedsters';
+  if (rank === 1 && pct >= 75) return '🔥 The Contenders';
+  if (lateCount === 0 && pct > 50) return '✨ The Reliables';
+  if (lateCount > 3) return '😅 The Fashionably Late';
+  if (pct < 25) return '💤 The Sleeping Giants';
+  return '🎯 The Comeback Kings';
+}
+
+function getTrashTalk(rank: number, gap: number, leaderName: string): string {
+  if (rank === 0) return 'Looking back at the competition like 😎';
+  if (gap <= 10) return `Breathing down ${leaderName}'s neck! 👀`;
+  if (gap <= 25) return `${leaderName} is getting nervous... 😰`;
+  if (gap <= 50) return `Plot twist incoming? 🎬`;
+  return 'Still warming up... 🏃‍♂️💨';
 }
 
 export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
@@ -36,22 +54,23 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
 
   const sorted = [...teams].sort((a, b) => b.pct - a.pct);
   const leaderPct = sorted[0]?.pct || 0;
+  const leaderName = sorted[0] ? TEAM_NAMES[sorted[0].teamNumber - 1] : 'the leader';
 
   return (
     <div className="glass-card p-6 fade-in-up">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🏅</span>
+          <span className="text-2xl">🏆</span>
           <div>
-            <h2 className="text-lg font-bold text-white">Team Leaderboard</h2>
-            <p className="text-xs text-slate-400">Overall performance across all categories</p>
+            <h2 className="text-lg font-bold text-white">The Great OSA Race</h2>
+            <p className="text-xs text-slate-400">May the best team win! (spoiler: they all think they&apos;re the best)</p>
           </div>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" /> On Track
-          <span className="inline-block w-2 h-2 rounded-full bg-amber-400 ml-2" /> Needs Push
-          <span className="inline-block w-2 h-2 rounded-full bg-red-400 ml-2" /> Behind
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" /> Crushing it
+          <span className="inline-block w-2 h-2 rounded-full bg-amber-400 ml-2" /> Catching up
+          <span className="inline-block w-2 h-2 rounded-full bg-red-400 ml-2" /> Napping
         </div>
       </div>
 
@@ -64,7 +83,8 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
           const isExpanded = expandedTeam === team.teamNumber;
           const isLeader = rank === 0;
           const statusColor = team.pct >= 75 ? '#34d399' : team.pct >= 50 ? '#fbbf24' : '#f87171';
-          const statusLabel = team.pct >= 75 ? 'On Track' : team.pct >= 50 ? 'Needs Push' : 'Behind';
+          const teamTitle = getTeamTitle(rank, team.pct, team.lateCount);
+          const trashTalk = getTrashTalk(rank, gap, leaderName);
 
           return (
             <div
@@ -96,20 +116,26 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
 
                 {/* Team info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-base">{TEAM_EMOJIS[idx]}</span>
                     <span className="font-bold text-white text-sm">{TEAM_NAMES[idx]}</span>
+                    <span className="text-[10px] text-slate-400 italic hidden sm:inline">{teamTitle}</span>
                     {isLeader && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 pulse-ring">
-                        👑 LEADER
+                        👑 KING OF THE HILL
                       </span>
                     )}
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full ml-auto sm:ml-2 font-semibold"
                       style={{ background: `${statusColor}20`, color: statusColor, border: `1px solid ${statusColor}40` }}
                     >
-                      {statusLabel}
+                      {team.pct >= 75 ? 'On Fire 🔥' : team.pct >= 50 ? 'Warming Up ☕' : 'Just Started 😴'}
                     </span>
+                  </div>
+
+                  {/* Trash talk */}
+                  <div className="text-[10px] text-slate-500 italic mb-1.5">
+                    {trashTalk}
                   </div>
 
                   {/* Progress bar */}
@@ -131,14 +157,14 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
                 </div>
               </div>
 
-              {/* Gap indicator */}
+              {/* Gap indicator with sass */}
               {gap > 0 && (
                 <div className="mt-2 ml-14 flex items-center gap-2 gap-pulse">
                   <span className="text-[11px] text-amber-400">
-                    ⚡ {gap}% behind leader
+                    ⚡ {gap}% behind {leaderName}
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    · {team.totalPossible - team.totalSubmitted} remaining
+                    · {team.totalPossible - team.totalSubmitted} reports left (no pressure 😅)
                   </span>
                 </div>
               )}
@@ -149,20 +175,23 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
                   <div className="text-center">
                     <div className="text-xl font-bold text-emerald-400">{team.onTimeCount}</div>
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider">On Time</div>
+                    <div className="text-[9px] text-slate-600 mt-0.5">{team.onTimeCount > 3 ? 'Punctuality goals! ⏰' : 'Room for improvement'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xl font-bold text-red-400">{team.lateCount}</div>
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider">Late</div>
+                    <div className="text-[9px] text-slate-600 mt-0.5">{team.lateCount === 0 ? 'Clean record! ✨' : team.lateCount > 3 ? 'Oops... 😬' : 'Not too bad'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xl font-bold text-white">{team.totalSubmitted}/{team.totalPossible}</div>
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider">Total</div>
+                    <div className="text-[9px] text-slate-600 mt-0.5">{team.totalSubmitted === team.totalPossible ? 'PERFECT! 🎉' : 'Keep going!'}</div>
                   </div>
                   {gap > 0 && (
                     <div className="col-span-3 text-center">
                       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
                         <span className="text-amber-400 text-xs font-medium">
-                          💪 Submit {Math.ceil((gap / 100) * team.totalPossible)} more report{Math.ceil((gap / 100) * team.totalPossible) !== 1 ? 's' : ''} to catch up with the leader!
+                          💪 Submit {Math.ceil((gap / 100) * team.totalPossible)} more report{Math.ceil((gap / 100) * team.totalPossible) !== 1 ? 's' : ''} to catch up! (or just let {leaderName} have their moment 😌)
                         </span>
                       </div>
                     </div>
@@ -178,10 +207,12 @@ export function TeamLeaderboard({ teams }: TeamLeaderboardProps) {
       <div className="mt-5 text-center">
         <p className="text-xs text-slate-500">
           {leaderPct === 100
-            ? '🎉 All teams have completed their submissions!'
+            ? '🎉 ALL TEAMS COMPLETED! Time for a celebratory coffee break ☕ (or start the next batch 😈)'
             : sorted[sorted.length - 1]?.pct === 0
-            ? '🚀 Submissions are starting to roll in — every report counts!'
-            : `📈 ${sorted[0]?.totalSubmitted} submissions in so far — keep the momentum going!`}
+            ? '🚀 Someone needs to break the silence! First submission gets bragging rights forever!'
+            : sorted[0]?.pct === sorted[sorted.length - 1]?.pct
+            ? '🤝 It&apos;s a TIE! The suspense is killing me... who will break the deadlock?'
+            : `${sorted[0] ? TEAM_NAMES[sorted[0].teamNumber - 1] : 'Someone'} is showing off with ${leaderPct}%... the rest are just "strategically pacing themselves" 😏`}
         </p>
       </div>
     </div>

@@ -127,7 +127,9 @@ export default async function CategoryPage({
                 <span className="text-2xl">🚨</span>
                 <div>
                   <div className="text-sm font-bold text-red-300">{overdueReports.length} Overdue Report{overdueReports.length > 1 ? 's' : ''}</div>
-                  <div className="text-xs text-slate-400">Past deadline — needs immediate action</div>
+                  <div className="text-xs text-slate-400">
+                    {overdueReports.length > 3 ? 'The deadline called... it misses you 😢' : 'Past deadline — someone owes the admin coffee ☕'}
+                  </div>
                 </div>
               </div>
             )}
@@ -137,7 +139,7 @@ export default async function CategoryPage({
                 <div>
                   <div className="text-sm font-bold text-amber-300">{upcomingReports.length} Due This Week</div>
                   <div className="text-xs text-slate-400">
-                    Next: {upcomingReports[0]?.title} — {new Date(upcomingReports[0]?.deadline_date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                    Next: {upcomingReports[0]?.title} — {new Date(upcomingReports[0]?.deadline_date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} ({Math.ceil((new Date(upcomingReports[0]?.deadline_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days to panic... I mean prepare 😅)
                   </div>
                 </div>
               </div>
@@ -322,9 +324,20 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer with rotating funny messages */}
         <footer className="text-center mt-12 py-6 border-t border-slate-700/30">
-          <p className="text-xs text-slate-600">OSA Office · Document Tracking System</p>
+          <p className="text-xs text-slate-600">
+            {(() => {
+              const jokes = [
+                'OSA Office · Where deadlines are just suggestions... until they\'re not 😅',
+                'OSA Office · Making report submission fun since forever! (or at least it feels that way)',
+                'OSA Office · Because someone has to track all this paperwork 📊',
+                'OSA Office · "I\'ll submit it tomorrow" — everyone, every time',
+                'OSA Office · Turning "almost done" into "actually done" since day one',
+              ];
+              return jokes[Math.floor(Math.random() * jokes.length)];
+            })()}
+          </p>
         </footer>
       </main>
     </div>

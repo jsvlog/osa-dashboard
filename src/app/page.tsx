@@ -252,9 +252,20 @@ export default async function HomePage() {
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer with rotating funny messages */}
         <footer className="text-center mt-12 py-6 border-t border-slate-700/30">
-          <p className="text-xs text-slate-600">OSA Office · Document Tracking System</p>
+          <p className="text-xs text-slate-600">
+            {(() => {
+              const jokes = [
+                'OSA Office · Where deadlines are just suggestions... until they\'re not 😅',
+                'OSA Office · Making report submission fun since forever! (or at least it feels that way)',
+                'OSA Office · Because someone has to track all this paperwork 📊',
+                'OSA Office · "I\'ll submit it tomorrow" — everyone, every time',
+                'OSA Office · Turning "almost done" into "actually done" since day one',
+              ];
+              return jokes[Math.floor(Math.random() * jokes.length)];
+            })()}
+          </p>
         </footer>
       </main>
     </div>

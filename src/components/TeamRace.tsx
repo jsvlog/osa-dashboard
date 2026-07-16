@@ -24,6 +24,26 @@ const TEAM_COLORS = [
 
 const TEAM_RUNNERS = ['🏃‍♂️', '🏃‍♀️', '🚴‍♂️', '🚴‍♀️'];
 
+function getRunnerCommentary(pct: number, rank: number, leaderPct: number): string {
+  const gap = leaderPct - pct;
+  if (pct === 100) return '🏆 Already celebrating with pizza!';
+  if (pct === 0) return '💤 Still tying their shoelaces...';
+  if (rank === 0) return '🏎️ VROOM VROOM! Untouchable!';
+  if (gap <= 5) return '😤 So close they can taste victory!';
+  if (gap <= 15) return '🔥 Catching up FAST! The leader is sweating!';
+  if (gap <= 30) return '😅 "I\'m not behind, I\'m just... pacing myself"';
+  if (gap <= 50) return '🐌 "It\'s a marathon, not a sprint" (copium)';
+  return '🧘 Taking the zen approach: "The reports will come when they come"';
+}
+
+function getFinishLineMessage(leaderPct: number): string {
+  if (leaderPct === 100) return '🎊 Race finished! Pop the champagne! 🍾';
+  if (leaderPct >= 75) return '🏁 Almost there! The finish line is waving!';
+  if (leaderPct >= 50) return '🏁 Halfway mark! Keep those legs moving!';
+  if (leaderPct >= 25) return '🏁 Still early... no one\'s even broken a sweat yet';
+  return '🏁 The race has barely started! Where is everyone?!';
+}
+
 export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
   const [hoveredTeam, setHoveredTeam] = useState<number | null>(null);
 
@@ -37,8 +57,8 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
         <div className="flex items-center gap-3">
           <span className="text-2xl">🏁</span>
           <div>
-            <h2 className="text-lg font-bold text-white">Submission Race</h2>
-            <p className="text-xs text-slate-400">{categoryLabel} — who&apos;s leading?</p>
+            <h2 className="text-lg font-bold text-white">The {categoryLabel} Grand Prix</h2>
+            <p className="text-xs text-slate-400">May the fastest submitter win! 🏎️💨</p>
           </div>
         </div>
         {leader && leader.pct > 0 && (
@@ -51,7 +71,7 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
                 border: `1px solid ${TEAM_COLORS[leader.teamNumber - 1].dot}40`,
               }}
             >
-              👑 Team {leader.teamNumber} leads
+              👑 Team {leader.teamNumber} is showing off
             </span>
           </div>
         )}
@@ -64,6 +84,7 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
           const gap = leader.pct - team.pct;
           const isHovered = hoveredTeam === team.teamNumber;
           const isLeader = rank === 0 && team.pct > 0;
+          const commentary = getRunnerCommentary(team.pct, rank, leader.pct);
 
           return (
             <div
@@ -78,12 +99,15 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
                 <span className="text-xs font-bold" style={{ color: TEAM_COLORS[idx].dot }}>
                   {isLeader ? '👑' : `#${rank + 1}`} Team {team.teamNumber}
                 </span>
+                <span className="text-[10px] text-slate-400 italic hidden sm:inline ml-1">
+                  {commentary}
+                </span>
                 <span className="text-[10px] text-slate-500 ml-auto">
                   {team.submitted}/{team.total}
                 </span>
                 {gap > 0 && (
                   <span className="text-[10px] text-amber-400 gap-pulse font-medium">
-                    -{gap}%
+                    -{gap}% 😬
                   </span>
                 )}
               </div>
@@ -135,19 +159,19 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
                 </div>
               </div>
 
-              {/* Hover detail */}
+              {/* Hover detail with sass */}
               {isHovered && (
-                <div className="mt-1.5 flex items-center gap-4 text-[11px] count-up">
-                  <span className="text-emerald-400">✓ {team.submitted} submitted</span>
+                <div className="mt-1.5 flex items-center gap-4 text-[11px] count-up flex-wrap">
+                  <span className="text-emerald-400">✓ {team.submitted} submitted (nice!)</span>
                   {team.late > 0 && (
-                    <span className="text-red-400">⚠ {team.late} late</span>
+                    <span className="text-red-400">⚠ {team.late} late ({team.late > 2 ? 'yikes 😅' : 'oops'})</span>
                   )}
                   <span className="text-slate-500">
-                    {team.total - team.submitted} remaining
+                    {team.total - team.submitted} remaining ({team.total - team.submitted === 0 ? 'DONE! 🎉' : 'keep going!'})
                   </span>
                   {gap > 0 && (
                     <span className="text-amber-400 ml-auto font-medium">
-                      💪 {Math.ceil((gap / 100) * team.total)} more to catch up!
+                      💪 {Math.ceil((gap / 100) * team.total)} more to catch up! (or just accept defeat gracefully 😌)
                     </span>
                   )}
                 </div>
@@ -159,7 +183,9 @@ export function TeamRace({ teams, categoryLabel }: TeamRaceProps) {
 
       {/* Finish line label */}
       <div className="mt-3 text-right">
-        <span className="text-[10px] text-slate-600 uppercase tracking-wider">🏁 Finish Line — 100%</span>
+        <span className="text-[10px] text-slate-600 uppercase tracking-wider">
+          {getFinishLineMessage(leader?.pct || 0)}
+        </span>
       </div>
     </div>
   );
